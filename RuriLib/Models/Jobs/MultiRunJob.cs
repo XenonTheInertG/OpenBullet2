@@ -23,12 +23,12 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
-using PuppeteerSharp;
 using RuriLib.Models.Data.Resources;
 using RuriLib.Models.Data.Resources.Options;
 using RuriLib.Helpers;
 using IronPython.Compiler;
 using IronPython.Runtime;
+using RuriLib.Models.Captchas;
 
 namespace RuriLib.Models.Jobs
 {
@@ -81,8 +81,10 @@ namespace RuriLib.Models.Jobs
         public event EventHandler<Exception> OnError;
         public event EventHandler<float> OnProgress;
         public event EventHandler<JobStatus> OnStatusChanged;
+        public event EventHandler OnBotsChanged;
         public event EventHandler OnCompleted;
         public event EventHandler OnTimerTick;
+        public event EventHandler<Hit> OnHit;
 
         /*********
          * STATS *
@@ -233,7 +235,9 @@ namespace RuriLib.Models.Jobs
                 }
                 finally
                 {
-                    botData.Logger.Log($"[{DateTime.Now.ToShortTimeString()}] BOT ENDED WITH STATUS: {botData.STATUS}");
+                    var endMessage = $"[{DateTime.Now.ToLongTimeString()}] BOT ENDED WITH STATUS: {botData.STATUS}";
+                    botData.ExecutingBlock(endMessage);
+                    botData.Logger.Log(endMessage);
 
                     // Close the browser if needed
                     if (botData.ConfigSettings.PuppeteerSettings.QuitBrowserStatuses.Contains(botData.STATUS))
@@ -281,6 +285,26 @@ namespace RuriLib.Models.Jobs
                 }
                 else if (botData.STATUS == "RETRY")
                 {
+                    if (botData.ConfigSettings.GeneralSettings.ReportLastCaptchaOnRetry)
+                    {
+                        var lastCaptcha = botData.TryGetObject<CaptchaInfo>("lastCaptchaInfo");
+
+                        if (lastCaptcha is not null)
+                        {
+                            try
+                            {
+                                botData.ExecutingBlock("Reporting bad captcha upon RETRY status");
+                                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                                await botData.Providers.Captcha.ReportSolution(lastCaptcha.Id, lastCaptcha.Type, false, cts.Token);
+                                botData.ExecutingBlock("Bad captcha reported!");
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    }
+
                     input.Job.DebugLog($"RETRY ({botData.Line.Data})({botData.Proxy})");
                     Interlocked.Increment(ref input.Job.dataRetried);
                     goto START;
@@ -463,7 +487,10 @@ namespace RuriLib.Models.Jobs
             parallelizer.Error += PropagateError;
             parallelizer.NewResult += PropagateResult;
             parallelizer.Completed += PropagateCompleted;
-            parallelizer.Completed += (s, e) => Skip += DataTested;
+            parallelizer.Completed += (s, e) =>
+            {
+                Skip += DataTested;
+            };
 
             ResetStats();
             StartTimers();
@@ -532,38 +559,39 @@ namespace RuriLib.Models.Jobs
             {
                 await parallelizer.ChangeDegreeOfParallelism(amount);
                 logger?.LogInfo(Id, $"Changed bots to {amount}");
+                OnBotsChanged?.Invoke(this, EventArgs.Empty);
             }
         }
         #endregion
 
         #region Propagation of Parallelizer events
-        private void PropagateTaskError(object sender, ErrorDetails<MultiRunInput> details)
+        private void PropagateTaskError(object _, ErrorDetails<MultiRunInput> details)
         {
-            OnTaskError?.Invoke(sender, details);
+            OnTaskError?.Invoke(this, details);
             logger?.LogException(Id, details.Exception);
         }
 
-        private void PropagateError(object sender, Exception ex)
+        private void PropagateError(object _, Exception ex)
         {
-            OnError?.Invoke(sender, ex);
+            OnError?.Invoke(this, ex);
             logger?.LogException(Id, ex);
         }
 
-        private void PropagateResult(object sender, ResultDetails<MultiRunInput, CheckResult> result)
+        private void PropagateResult(object _, ResultDetails<MultiRunInput, CheckResult> result)
         {
-            OnResult?.Invoke(sender, result);
+            OnResult?.Invoke(this, result);
             // We're not logging results to the IJobLogger because they could arrive at a very high rate
             // and not be very useful, we're mostly interested in errors here.
         }
 
-        private void PropagateProgress(object sender, float progress)
+        private void PropagateProgress(object _, float progress)
         {
-            OnProgress?.Invoke(sender, progress);
+            OnProgress?.Invoke(this, progress);
         }
 
-        private void PropagateCompleted(object sender, EventArgs e)
+        private void PropagateCompleted(object _, EventArgs e)
         {
-            OnCompleted?.Invoke(sender, e);
+            OnCompleted?.Invoke(this, e);
             logger?.LogInfo(Id, "Execution completed");
         }
         #endregion
@@ -667,6 +695,7 @@ namespace RuriLib.Models.Jobs
 
             // Add it to the local list of hits
             Hits.Add(hit);
+            OnHit?.Invoke(this, hit);
 
             foreach (var hitOutput in HitOutputs)
             {

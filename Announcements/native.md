@@ -1,0 +1,1 @@
+Since the native client was just recently released, you might encounter some bugs that we didn't find during the alpha tests. I am in the process of fixing the critical ones. Please make sure to report them on the GitHub repository and update your client any time a new update is available to get the latest fixes! Thank you for your collaboration!
