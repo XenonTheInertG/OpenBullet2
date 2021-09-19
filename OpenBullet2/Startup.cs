@@ -27,6 +27,7 @@ using OpenBullet2.Core;
 using OpenBullet2.Core.Services;
 using OpenBullet2.Repositories;
 using OpenBullet2.Core.Helpers;
+using OpenBullet2.Helpers;
 
 namespace OpenBullet2
 {
@@ -73,7 +74,9 @@ namespace OpenBullet2
             services.AddScoped<IGuestRepository, DbGuestRepository>();
             services.AddScoped<IRecordRepository, DbRecordRepository>();
             services.AddScoped<IThemeRepository>(_ => new DiskThemeRepository("wwwroot/css/themes"));
-            services.AddScoped<IConfigRepository>(_ => new DiskConfigRepository("UserData/Configs"));
+            services.AddScoped<IConfigRepository>(service =>
+                new DiskConfigRepository(service.GetService<RuriLibSettingsService>(),
+                "UserData/Configs"));
             services.AddScoped<IWordlistRepository>(service => 
                 new HybridWordlistRepository(service.GetService<ApplicationDbContext>(),
                 "UserData/Wordlists"));
@@ -200,6 +203,9 @@ namespace OpenBullet2
             // Load the configs
             var configService = app.ApplicationServices.GetService<ConfigService>();
             configService.ReloadConfigs().Wait();
+
+            // Initialize autocompletion
+            AutocompletionProvider.Init(obSettings.GeneralSettings.CustomSnippets);
         }
     }
 }
