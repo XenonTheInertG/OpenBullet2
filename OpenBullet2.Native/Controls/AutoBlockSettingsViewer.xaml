@@ -61,6 +61,7 @@
         <CheckBox
             Margin="5 5 0 0"
             Content="Is Capture"
+            Visibility="{Binding HasReturnValue, Converter={StaticResource ResourceKey=BoolToVis}}"
             IsChecked="{Binding IsCapture}"/>
         <Label 
             Content="Settings:"
@@ -68,6 +69,22 @@
             Foreground="{DynamicResource ForegroundCustom}" />
         <StackPanel 
             x:Name="settingsPanel"
+            HorizontalAlignment="Stretch" />
+        <Label 
+            Visibility="{Binding HasActions, Converter={StaticResource ResourceKey=BoolToVis}}"
+            Content="Actions:"
+            Margin="0 5"
+            Foreground="{DynamicResource ForegroundCustom}" />
+        <WrapPanel
+            x:Name="actionsPanel"
+            HorizontalAlignment="Stretch" />
+        <Label 
+            Visibility="{Binding HasImages, Converter={StaticResource ResourceKey=BoolToVis}}"
+            Content="Images:"
+            Margin="0 5"
+            Foreground="{DynamicResource ForegroundCustom}" />
+        <StackPanel
+            x:Name="imagesPanel"
             HorizontalAlignment="Stretch" />
     </StackPanel>
 </UserControl>

@@ -43,6 +43,7 @@ namespace OpenBullet2.Native.Controls
             httpVersionSetting.Setting = vm.HttpRequestBlock.Settings["httpVersion"];
             autoRedirectSetting.Setting = vm.HttpRequestBlock.Settings["autoRedirect"];
             alwaysSendContentSetting.Setting = vm.HttpRequestBlock.Settings["alwaysSendContent"];
+            decodeHtmlSetting.Setting = vm.HttpRequestBlock.Settings["decodeHtml"];
 
             switch (vm.Mode)
             {
@@ -75,6 +76,7 @@ namespace OpenBullet2.Native.Controls
             absoluteUriInFirstLineSetting.Setting = vm.HttpRequestBlock.Settings["absoluteUriInFirstLine"];
             readResponseContentSetting.Setting = vm.HttpRequestBlock.Settings["readResponseContent"];
             codePagesEncodingSetting.Setting = vm.HttpRequestBlock.Settings["codePagesEncoding"];
+            httpLibrarySetting.Setting = vm.HttpRequestBlock.Settings["httpLibrary"];
             securityProtocolSetting.Setting = vm.HttpRequestBlock.Settings["securityProtocol"];
             useCustomCipherSuitesSetting.Setting = vm.HttpRequestBlock.Settings["useCustomCipherSuites"];
             customCipherSuitesSetting.Setting = vm.HttpRequestBlock.Settings["customCipherSuites"];

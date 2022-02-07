@@ -335,6 +335,7 @@ namespace RuriLib.Models.Blocks.Custom
             writer.Write("MaxNumberOfRedirects = " + GetSettingValue("maxNumberOfRedirects") + ", ");
             writer.Write("ReadResponseContent = " + GetSettingValue("readResponseContent") + ", ");
             writer.Write("AbsoluteUriInFirstLine = " + GetSettingValue("absoluteUriInFirstLine") + ", ");
+            writer.Write("HttpLibrary = " + GetSettingValue("httpLibrary") + ", ");
             writer.Write("SecurityProtocol = " + GetSettingValue("securityProtocol") + ", ");
             writer.Write("CustomCookies = " + GetSettingValue("customCookies") + ", ");
             writer.Write("CustomHeaders = " + GetSettingValue("customHeaders") + ", ");
@@ -342,6 +343,7 @@ namespace RuriLib.Models.Blocks.Custom
             writer.Write("HttpVersion = " + GetSettingValue("httpVersion") + ", ");
             writer.Write("CodePagesEncoding = " + GetSettingValue("codePagesEncoding") + ", ");
             writer.Write("AlwaysSendContent = " + GetSettingValue("alwaysSendContent") + ", ");
+            writer.Write("DecodeHtml = " + GetSettingValue("decodeHtml") + ", ");
             writer.Write("UseCustomCipherSuites = " + GetSettingValue("useCustomCipherSuites") + ", ");
             writer.Write("CustomCipherSuites = " + GetSettingValue("customCipherSuites") + " ");
 

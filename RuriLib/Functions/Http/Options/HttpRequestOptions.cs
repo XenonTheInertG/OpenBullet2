@@ -9,6 +9,7 @@ namespace RuriLib.Functions.Http.Options
         public bool AutoRedirect { get; set; } = true;
         public int MaxNumberOfRedirects { get; set; } = 8;
         public bool AbsoluteUriInFirstLine { get; set; } = false;
+        public HttpLibrary HttpLibrary { get; set; } = HttpLibrary.RuriLibHttp;
         public SecurityProtocol SecurityProtocol { get; set; } = SecurityProtocol.SystemDefault;
         public Dictionary<string, string> CustomCookies { get; set; } = new();
         public Dictionary<string, string> CustomHeaders { get; set; } = new();
@@ -18,6 +19,13 @@ namespace RuriLib.Functions.Http.Options
         public List<string> CustomCipherSuites { get; set; } = new();
         public string CodePagesEncoding { get; set; } = string.Empty;
         public bool AlwaysSendContent { get; set; } = false;
+        public bool DecodeHtml { get; set; } = false;
         public bool ReadResponseContent { get; set; } = true;
+    }
+
+    public enum HttpLibrary
+    {
+        SystemNet,
+        RuriLibHttp
     }
 }

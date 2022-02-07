@@ -1,4 +1,5 @@
-﻿@using RuriLib.Models.Blocks
+﻿@using OpenBullet2.Helpers
+@using RuriLib.Models.Blocks
 @inject Microsoft.Extensions.Localization.IStringLocalizer<BlockSettingsViewer> Loc
 
 <EditForm Model="Block">
@@ -32,7 +33,44 @@
     <BlockInputField BlockSetting="setting" />
 }
 
+@if (Block.Descriptor.Actions.Any())
+{
+    <h6 class="font-weight-bold fg-custom mt-3">@Loc["Actions"]:</h6>
+    @foreach (var action in Block.Descriptor.Actions)
+    {
+        <button class="btn btn-sm btn-primary mr-1" title="@action.Description" @onclick="(async () => await RunAction(action))">@action.Name</button>
+    }
+}
+
+@if (Block.Descriptor.Images.Any())
+{
+    <h6 class="font-weight-bold fg-custom mt-3">@Loc["Images"]:</h6>
+    @foreach (var image in Block.Descriptor.Images)
+    {
+        <label>@image.Value.Name</label>
+        <InputByteArrayImage
+            MaxWidth="@image.Value.MaxWidth"
+            MaxHeight="@image.Value.MaxHeight"
+            @bind-Bytes="image.Value.Value" />
+    }
+}
+
 @code {
     [Parameter] public AutoBlockInstance Block { get; set; }
     [Parameter] public EventCallback ChangedLabel { get; set; }
+
+    private async Task RunAction(BlockActionInfo action)
+    {
+        try
+        {
+            action.Delegate.Invoke(Block);
+
+        }
+        catch (Exception ex)
+        {
+            await js.AlertException(ex);    
+        }
+
+        StateHasChanged();
+    }
 }
