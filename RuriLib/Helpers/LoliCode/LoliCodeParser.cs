@@ -65,7 +65,7 @@ namespace RuriLib.Helpers.LoliCode
                 setting.InputVariableName = variableName;
                 setting.InterpolatedSetting = param switch
                 {
-                    StringParameter _ => new InterpolatedStringSetting(),
+                    StringParameter x => new InterpolatedStringSetting() { MultiLine = x.MultiLine },
                     ListOfStringsParameter _ => new InterpolatedListOfStringsSetting(),
                     DictionaryOfStringsParameter _ => new InterpolatedDictionaryOfStringsSetting(),
                     _ => null
@@ -75,11 +75,11 @@ namespace RuriLib.Helpers.LoliCode
                     BoolParameter _ => new BoolSetting(),
                     IntParameter _ => new IntSetting(),
                     FloatParameter _ => new FloatSetting(),
-                    StringParameter _ => new StringSetting(),
+                    StringParameter x => new StringSetting() { MultiLine = x.MultiLine },
                     ListOfStringsParameter _ => new ListOfStringsSetting(),
                     DictionaryOfStringsParameter _ => new DictionaryOfStringsSetting(),
                     ByteArrayParameter _ => new ByteArraySetting(),
-                    EnumParameter _ => new EnumSetting(),
+                    EnumParameter x => new EnumSetting(x.EnumType),
                     _ => throw new NotSupportedException()
                 };
             }
@@ -89,14 +89,14 @@ namespace RuriLib.Helpers.LoliCode
                 setting.InputMode = SettingInputMode.Interpolated;
                 setting.InterpolatedSetting = param switch
                 {
-                    StringParameter _ => new InterpolatedStringSetting { Value = LineParser.ParseLiteral(ref input) },
+                    StringParameter x => new InterpolatedStringSetting { Value = LineParser.ParseLiteral(ref input), MultiLine = x.MultiLine },
                     ListOfStringsParameter _ => new InterpolatedListOfStringsSetting { Value = LineParser.ParseList(ref input) },
                     DictionaryOfStringsParameter _ => new InterpolatedDictionaryOfStringsSetting { Value = LineParser.ParseDictionary(ref input) },
                     _ => throw new NotSupportedException()
                 };
                 setting.FixedSetting = param switch // Initialize fixed setting as well, used for type switching
                 {
-                    StringParameter _ => new StringSetting { Value = (setting.InterpolatedSetting as InterpolatedStringSetting).Value },
+                    StringParameter x => new StringSetting { Value = (setting.InterpolatedSetting as InterpolatedStringSetting).Value, MultiLine = x.MultiLine },
                     ListOfStringsParameter _ => new ListOfStringsSetting { Value = (setting.InterpolatedSetting as InterpolatedListOfStringsSetting).Value },
                     DictionaryOfStringsParameter _ => new DictionaryOfStringsSetting { Value = (setting.InterpolatedSetting as InterpolatedDictionaryOfStringsSetting).Value },
                     _ => throw new NotSupportedException()
@@ -107,11 +107,11 @@ namespace RuriLib.Helpers.LoliCode
                 setting.InputMode = SettingInputMode.Fixed;
                 setting.FixedSetting = param switch
                 {
-                    StringParameter _ => new StringSetting { Value = LineParser.ParseLiteral(ref input) },
+                    StringParameter x => new StringSetting { Value = LineParser.ParseLiteral(ref input), MultiLine = x.MultiLine },
                     BoolParameter _ => new BoolSetting { Value = LineParser.ParseBool(ref input) },
                     ByteArrayParameter _ => new ByteArraySetting { Value = LineParser.ParseByteArray(ref input) },
                     DictionaryOfStringsParameter _ => new DictionaryOfStringsSetting { Value = LineParser.ParseDictionary(ref input) },
-                    EnumParameter x => new EnumSetting { Value = LineParser.ParseToken(ref input), EnumType = x.EnumType },
+                    EnumParameter x => new EnumSetting(x.EnumType) { Value = LineParser.ParseToken(ref input) },
                     FloatParameter _ => new FloatSetting { Value = LineParser.ParseFloat(ref input) },
                     IntParameter _ => new IntSetting { Value = LineParser.ParseInt(ref input) },
                     ListOfStringsParameter _ => new ListOfStringsSetting { Value = LineParser.ParseList(ref input) },
