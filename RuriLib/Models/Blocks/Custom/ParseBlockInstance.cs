@@ -23,6 +23,7 @@ namespace RuriLib.Models.Blocks.Custom
 
         public bool Recursive { get; set; } = false;
         public bool IsCapture { get; set; } = false;
+        public bool Safe { get; set; } = false;
         public ParseMode Mode { get; set; } = ParseMode.LR;
 
         public ParseBlockInstance(ParseBlockDescriptor descriptor)
@@ -44,7 +45,12 @@ namespace RuriLib.Models.Blocks.Custom
              */
 
             using var writer = new LoliCodeWriter(base.ToLC(printDefaultParams));
-            
+
+            if (Safe)
+            {
+                writer.AppendLine("SAFE", 2);
+            }
+
             if (Recursive)
                 writer.AppendLine("RECURSIVE", 2);
 
@@ -82,6 +88,12 @@ namespace RuriLib.Models.Blocks.Custom
 
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
+
+                if (line.StartsWith("SAFE"))
+                {
+                    Safe = true;
+                    continue;
+                }
 
                 if (line.StartsWith("RECURSIVE"))
                     Recursive = true;
@@ -129,20 +141,54 @@ namespace RuriLib.Models.Blocks.Custom
         public override string ToCSharp(List<string> definedVariables, ConfigSettings settings)
         {
             using var writer = new StringWriter();
-            
-            if (definedVariables.Contains(OutputVariable) || OutputVariable.StartsWith("globals."))
+            var outputType = Recursive ? "List<string>" : "string";
+            var defaultReturnValue = Recursive ? "new List<string>()" : "string.Empty";
+
+            // Safe mode, wrap method in try/catch but declare variable outside of it
+            if (Safe)
             {
+                // Only do this if we haven't declared the variable yet!
+                if (!definedVariables.Contains(OutputVariable) && !OutputVariable.StartsWith("globals."))
+                {
+                    if (!Disabled)
+                        definedVariables.Add(OutputVariable);
+
+                    writer.WriteLine($"{outputType} {OutputVariable} = {defaultReturnValue};");
+                }
+
+                writer.WriteLine("try {");
+
+                // Here we already know the variable exists so we just do the assignment
                 writer.Write($"{OutputVariable} = ");
+
+                WriteParseMethod(writer);
+
+                writer.WriteLine("} catch (Exception safeException) {");
+                writer.WriteLine("data.ERROR = safeException.PrettyPrint();");
+                writer.WriteLine("data.Logger.Log($\"[SAFE MODE] Exception caught and saved to data.ERROR: {data.ERROR}\", LogColors.Tomato); }");
             }
             else
             {
-                if (!Disabled)
-                    definedVariables.Add(OutputVariable);
+                if (definedVariables.Contains(OutputVariable) || OutputVariable.StartsWith("globals."))
+                {
+                    writer.Write($"{OutputVariable} = ");
+                }
+                else
+                {
+                    if (!Disabled)
+                        definedVariables.Add(OutputVariable);
 
-                var outputType = Recursive ? "List<string>" : "string";
-                writer.Write($"{outputType} {OutputVariable} = ");
+                    writer.Write($"{outputType} {OutputVariable} = ");
+                }
+
+                WriteParseMethod(writer);
             }
 
+            return writer.ToString();
+        }
+
+        private void WriteParseMethod(StringWriter writer)
+        {
             switch (Mode)
             {
                 case ParseMode.LR:
@@ -178,7 +224,7 @@ namespace RuriLib.Models.Blocks.Custom
                     writer.Write(CSharpWriter.FromSetting(Settings["leftDelim"]) + ", ");
                     writer.Write(CSharpWriter.FromSetting(Settings["rightDelim"]) + ", ");
                     writer.Write(CSharpWriter.FromSetting(Settings["caseSensitive"]) + ", ");
-                    
+
                     break;
 
                 case ParseMode.CSS:
@@ -207,10 +253,12 @@ namespace RuriLib.Models.Blocks.Custom
             writer.Write(CSharpWriter.FromSetting(Settings["urlEncodeOutput"]));
             writer.WriteLine(");");
 
-            if (IsCapture)
-                writer.WriteLine($"data.MarkForCapture(nameof({OutputVariable}));");
+            writer.WriteLine($"data.LogVariableAssignment(nameof({OutputVariable}));");
 
-            return writer.ToString();
+            if (IsCapture)
+            {
+                writer.WriteLine($"data.MarkForCapture(nameof({OutputVariable}));");
+            }
         }
     }
 }

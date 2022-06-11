@@ -24,6 +24,7 @@ namespace RuriLib.Models.Bots
         public Random Random { get; }
         public CancellationToken CancellationToken { get; set; }
         public AsyncLocker AsyncLocker { get; set; }
+        public Stepper Stepper { get; set; }
         public decimal CaptchaCredit { get; set; } = 0;
         public string ExecutionInfo { get; set; } = "IDLE";
 
@@ -36,6 +37,7 @@ namespace RuriLib.Models.Bots
         public Dictionary<string, string> COOKIES { get; set; } = new Dictionary<string, string>();
         public Dictionary<string, string> HEADERS { get; set; } = new Dictionary<string, string>();
         public string ERROR { get; set; } = string.Empty;
+        public int BOTNUM { get; set; } = 0;
 
         // This dictionary will hold stateful objects like a captcha provider, a TCP client, a selenium webdriver...
         private readonly Dictionary<string, object> objects = new Dictionary<string, object>();
@@ -64,6 +66,9 @@ namespace RuriLib.Models.Bots
             UseProxy = useProxy;
         }
 
+        public void LogVariableAssignment(string name)
+            => Logger.Log($"Assigned value to variable '{name}'", LogColors.Yellow);
+
         public void MarkForCapture(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -72,7 +77,7 @@ namespace RuriLib.Models.Bots
             if (!MarkedForCapture.Contains(name))
             {
                 MarkedForCapture.Add(name);
-                Logger.Log($"Variable {name} marked for capture", LogColors.Tomato);
+                Logger.Log($"Variable '{name}' marked for capture", LogColors.Tomato);
             }
         }
 
@@ -84,7 +89,7 @@ namespace RuriLib.Models.Bots
             if (MarkedForCapture.Contains(name))
             {
                 MarkedForCapture.Remove(name);
-                Logger.Log($"Variable {name} removed from capture", LogColors.Yellow);
+                Logger.Log($"Variable '{name}' removed from capture", LogColors.Yellow);
             }
         }
 

@@ -195,7 +195,11 @@ namespace RuriLib.Models.Jobs
                 Dictionary<string, object> outputVariables = new();
 
                 // Add this BotData to the array for detailed MultiRunJob display mode
-                input.Job.CurrentBotDatas[(int)(input.Index++ % input.Job.Bots)] = botData;
+                var botIndex = (int)(input.Index++ % input.Job.Bots);
+                input.Job.CurrentBotDatas[botIndex] = botData;
+
+                // Set the BOTNUM
+                botData.BOTNUM = botIndex + 1;
 
                 START:
                 token.ThrowIfCancellationRequested();
@@ -723,8 +727,13 @@ namespace RuriLib.Models.Jobs
 
             if (PeriodicReloadInterval > TimeSpan.Zero)
             {
-                proxyReloadTimer = new Timer(new TimerCallback(async _ => await proxyPool.ReloadAll(ShuffleProxies).ConfigureAwait(false)),
-                    null, (int)PeriodicReloadInterval.TotalMilliseconds, (int)PeriodicReloadInterval.TotalMilliseconds);
+                proxyReloadTimer = new Timer(new TimerCallback(async _ =>
+                {
+                    if (proxyPool is not null)
+                    {
+                        await proxyPool.ReloadAll(ShuffleProxies).ConfigureAwait(false);
+                    }
+                }), null, (int)PeriodicReloadInterval.TotalMilliseconds, (int)PeriodicReloadInterval.TotalMilliseconds);
             }
         }
 

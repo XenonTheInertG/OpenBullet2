@@ -1,5 +1,6 @@
 ﻿@using RuriLib.Models.Blocks.Settings
-@using RuriLib.Extensions 
+@using RuriLib.Extensions
+@using OpenBullet2.Shared
 @inject Microsoft.Extensions.Localization.IStringLocalizer<FixedSettingViewer> Loc
  
 <EditForm Model="BlockSetting">
@@ -11,7 +12,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-auto mr-0 pr-0">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                     <div class="col align-self-stretch">
@@ -42,7 +43,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-auto mr-0 pr-0">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                     <div class="col align-self-stretch mt-1">
@@ -59,7 +60,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-auto mr-0 pr-0">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                     <div class="col align-self-stretch">
@@ -76,7 +77,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-auto mr-0 pr-0">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                     <div class="col align-self-stretch">
@@ -97,7 +98,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-auto mr-0 pr-0">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                     <div class="col align-self-stretch">
@@ -114,7 +115,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-12">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                     <div class="col align-self-stretch">
@@ -138,7 +139,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-12">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                     <div class="col align-self-stretch">
@@ -162,7 +163,7 @@
                     @if (DisplayName)
                     {
                         <div class="col-12">
-                            <label style="line-height: 30px;">@Name</label>
+                            <label style="line-height: 30px;"><Tooltip Text="@BlockSetting.Description">@BlockSetting.ReadableName</Tooltip></label>
                         </div>
                     }
                      <div class="col-12">
